@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -38,15 +39,25 @@ class AuthController extends Controller
                 "error" => $th->getMessage(),
             ], 500);
         }
-
-
-
-        #
     }
 
     # Login method
-    public function login()
+    public function login(Request $request)
     {
+        # data validation
+        $request->validate([
+            "email" => "required|string|email|max:255",
+            "password" => "required|string|min:8|",
+        ]);
+
+        # jwt auth and attempt
+        $credentials = $request->only('email', 'password');
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        #response
+        return $this->responseWithToken($token, $credentials);
     }
 
     # Profile method
@@ -62,5 +73,16 @@ class AuthController extends Controller
     # Logout method
     public function logout()
     {
+    }
+
+    # method return response with token
+    protected function responseWithToken($token, $user)
+    {
+        return response()->json([
+            "message" => "logged in successfully",
+            "user" => $user,
+            "access_token" => $token,
+            "token_type" => 'bearer',
+        ]);
     }
 }
