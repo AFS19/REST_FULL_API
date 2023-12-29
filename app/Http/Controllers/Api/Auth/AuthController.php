@@ -63,6 +63,16 @@ class AuthController extends Controller
     # Profile method
     public function profile()
     {
+        $user = auth()->user();
+        $credentials = [
+            "name" => $user?->name,
+            "email" => $user?->email,
+        ];
+        return response()->json([
+            "status" => "success",
+            "message" => "Profile data",
+            "user" => $credentials,
+        ]);
     }
 
     # Refresh token method
