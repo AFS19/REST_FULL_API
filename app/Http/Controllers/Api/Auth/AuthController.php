@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -57,7 +58,7 @@ class AuthController extends Controller
         }
 
         #response
-        return $this->responseWithToken($token, $credentials);
+        return $this->responseWithToken($token, $credentials, "logged in successfully");
     }
 
     # Profile method
@@ -78,6 +79,7 @@ class AuthController extends Controller
     # Refresh token method
     public function refreshToken()
     {
+        return $this->responseWithToken(Auth::refresh(), Auth::user()->only('name', 'email'), "new access token generated successfully");
     }
 
     # Logout method
@@ -86,10 +88,10 @@ class AuthController extends Controller
     }
 
     # method return response with token
-    protected function responseWithToken($token, $user)
+    protected function responseWithToken($token, $user, $message)
     {
         return response()->json([
-            "message" => "logged in successfully",
+            "message" => $message,
             "user" => $user,
             "access_token" => $token,
             "token_type" => 'bearer',
